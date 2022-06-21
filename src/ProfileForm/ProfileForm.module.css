@@ -1,0 +1,21 @@
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+.label {
+  display: block;
+}
+
+.marginLeft {
+  margin-left: 10px;
+}
+
+.saveButton {
+  margin-top: 10px;
+}
+
+.error {
+  color: red;
+  font-size: 10px;
+}
