@@ -101,7 +101,7 @@ const ProductsList = ({ total }) => {
   const onSearch = useCallback(event => {
     const params = new URLSearchParams(location.search);
     params.set('search', event.target.value);
-    navigate(`?${params.toString()}`);
+    navigate(`?${params.toString()}`, { replace: true });
   }, [navigate, location]);
 
   const filteredProducts = useMemo(() => products.filter(p => {

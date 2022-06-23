@@ -4,6 +4,10 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import('./calculation2.js').then(result => {
+  console.log(result.pow(2, 3));
+});
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <App />

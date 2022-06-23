@@ -1,9 +1,12 @@
 import { Routes, Route } from 'react-router';
+import { lazy, Suspense } from 'react';
+import { Spinner } from 'react-bootstrap';
 import { BrowserRouter, NavLink } from "react-router-dom";
-import About from './pages/About';
-import Home from './pages/Home';
-import Details from './pages/Details';
 import './App.css';
+
+const Home = lazy(() => import(/* webpackChunkName: "product-list" */ './pages/Home'));
+const Details = lazy(() => import(/* webpackChunkName: "product-details" */ './pages/Details'));
+const About = lazy(() => import(/* webpackChunkName: "extra" */ './pages/About'));
 
 function App() {
   return (
@@ -21,11 +24,17 @@ function App() {
             </NavLink>
           </li>
         </ul>
-        <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/about' element={<About />} />
-          <Route path='/products/:productId' element={<Details />} />
-        </Routes>
+        <Suspense fallback={(
+          <Spinner variant="primary" animation="border" role="status" className='mt-5'>
+            <span className="visually-hidden">Loading...</span>
+         </Spinner>
+        )}>
+          <Routes>
+            <Route path='/' element={<Home />} />
+            <Route path='/about' element={<About />} />
+            <Route path='/products/:productId' element={<Details />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </div>
   );
