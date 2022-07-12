@@ -1,78 +1,26 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Card, Spinner, Alert, Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router';
 import { useSearchParams, useLocation } from "react-router-dom";
-import { getProducts } from '../api/products';
+import { getProductsThunk } from '../store/modules/products/actions';
+import {
+  getProductsList,
+  getProductsIsLoading,
+  getProductsError,
+  getProductsPagesCount
+} from '../store/modules/products/selectors';
 import AppPagination from './AppPagination';
 
-const FETCH_PRODUCTS_START = 'FETCH_PRODUCTS_START';
-
-const FETCH_PRODUCTS_SUCCESS = 'FETCH_PRODUCTS_SUCCESS';
-
-const FETCH_PRODUCTS_ERROR = 'FETCH_PRODUCTS_ERROR';
-
-const fetchProductsStart = () => ({
-  type: FETCH_PRODUCTS_START
-});
-
-const fetchProductsSuccess = ({ products, pagesCount}) => ({
-  type: FETCH_PRODUCTS_SUCCESS,
-  payload: {
-    products,
-    pagesCount
-  }
-})
-
-const fetchProductsError = (error) => ({
-  type: FETCH_PRODUCTS_ERROR,
-  payload: error
-});
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case FETCH_PRODUCTS_START: {
-      return {
-        ...state,
-        isLoading: true
-      }
-    }
-    case FETCH_PRODUCTS_SUCCESS: {
-      const { products, pagesCount } = action.payload;
-      return {
-        ...state,
-        isLoading: false,
-        products,
-        pagesCount,
-        error: null
-      }
-    }
-    case FETCH_PRODUCTS_ERROR: {
-      return {
-        ...state,
-        isLoading: false,
-        error: action.payload
-      }
-    }
-    default: {
-      return state;
-    }
-  }
-};
-
 const ProductsList = ({ total }) => {
+  const dispatch = useDispatch();
+  const products = useSelector(getProductsList);
+  const isLoading = useSelector(getProductsIsLoading);
+  const error = useSelector(getProductsError);
+  const pagesCount = useSelector(getProductsPagesCount);
+  
   const location = useLocation();
   const [params] = useSearchParams();
-  const [{
-    products,
-    isLoading,
-    error,
-    pagesCount
-  }, dispatch] = useReducer(reducer, {
-    products: [],
-    isLoading: false,
-    error: null,
-    pagesCount: 0
-  });
 
   const activePage = +params.get('pageNumber') || 1;
   const searchTerm = params.get('search') || '';
@@ -80,16 +28,8 @@ const ProductsList = ({ total }) => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    dispatch(fetchProductsStart());
-    getProducts(activePage, total).then(({ data }) => {
-      dispatch(fetchProductsSuccess({ 
-        products: data.products,
-        pagesCount: data.total / total
-      }))
-    }).catch(err => {
-      dispatch(fetchProductsError(err));
-    });
-  }, [total, activePage]);
+    dispatch(getProductsThunk(total, activePage));
+  }, [total, activePage, dispatch]);
 
   const onPageNavigation = useCallback((index) => {
     const params = new URLSearchParams(location.search);
