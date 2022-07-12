@@ -9,7 +9,7 @@ const TodoList = () => {
   const todos = useSelector(getTodosList);
 
   const onItemRemove = (id) => {
-    dispatch(removeTodo(id))
+    dispatch(removeTodo({ id }))
   };
 
   return (

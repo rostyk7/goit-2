@@ -2,19 +2,25 @@ import { useCallback, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-import { connect } from 'react-redux';
+import { v4 } from 'uuid';
+import { useDispatch, useSelector } from 'react-redux';
 import { addTodo } from '../store/todo/actions';
 import { getTodosList } from '../store/todo/selectors';
 
-const TodoAdd = ({ todos, dispatchAddTodo }) => {
+const TodoAdd = () => {
   const [newContent, setNewContent] = useState('');
+  const dispatch = useDispatch();
+  const todos = useSelector(getTodosList);
 
   const onSetNewContentChange = useCallback(event => {
     setNewContent(event.target.value);
   }, [setNewContent]);
 
   const onAddNewTodo = () => {
-    dispatchAddTodo(newContent);
+    dispatch(addTodo({
+      content: newContent,
+      id: v4()
+    }));
     setNewContent('');
   };
 
@@ -34,10 +40,4 @@ const TodoAdd = ({ todos, dispatchAddTodo }) => {
   );
 };
 
-const mapStateToProps = (state) => ({
-  todos: getTodosList(state)
-});
-
-const mapDispatchToProps = { dispatchAddTodo: addTodo };
-
-export default connect(mapStateToProps, mapDispatchToProps)(TodoAdd);
+export default TodoAdd;
