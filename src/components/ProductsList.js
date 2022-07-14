@@ -28,7 +28,7 @@ const ProductsList = ({ total }) => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    dispatch(getProductsThunk(activePage, total));
+    dispatch(getProductsThunk({ activePage, total }));
   }, [total, activePage, dispatch]);
 
   const onPageNavigation = useCallback((index) => {
