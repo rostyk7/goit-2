@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Card, Spinner, Alert, Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router';
 import { useSearchParams, useLocation } from "react-router-dom";
-import { getProductsThunk } from '../store/modules/products/actions';
+import { getProductsThunk } from '../store/modules/products/slice';
 import {
   getProductsList,
   getProductsIsLoading,
@@ -28,7 +28,7 @@ const ProductsList = ({ total }) => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    dispatch(getProductsThunk(total, activePage));
+    dispatch(getProductsThunk(activePage, total));
   }, [total, activePage, dispatch]);
 
   const onPageNavigation = useCallback((index) => {
