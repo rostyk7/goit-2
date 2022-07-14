@@ -18,7 +18,6 @@ const fetchProductsError = (error) => ({
   payload: error
 });
 
-
 export const getProductsThunk = (total, activePage) => async (dispatch) => {
   dispatch(fetchProductsStart());
   try {
