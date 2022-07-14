@@ -8,7 +8,9 @@ import {
   getProductsList,
   getProductsIsLoading,
   getProductsError,
-  getProductsPagesCount
+  getProductsPagesCount,
+  getProductsPriceSum,
+  getHighRateProductsCount
 } from '../store/modules/products/selectors';
 import AppPagination from './AppPagination';
 
@@ -18,6 +20,8 @@ const ProductsList = ({ total }) => {
   const isLoading = useSelector(getProductsIsLoading);
   const error = useSelector(getProductsError);
   const pagesCount = useSelector(getProductsPagesCount);
+  const productsPriceSum = useSelector(getProductsPriceSum);
+  const highRatingProductsCount = useSelector(getHighRateProductsCount);
   
   const location = useLocation();
   const [params] = useSearchParams();
@@ -101,6 +105,10 @@ const ProductsList = ({ total }) => {
             </Card.Body>
           </Card>
         ))}
+        <div>
+          <strong>Price: {productsPriceSum}$</strong><br />
+          <strong>High rate products count: {highRatingProductsCount}</strong>
+        </div>
         <div className='d-flex justify-content-center'>
           <AppPagination
             pagesCount={pagesCount}
