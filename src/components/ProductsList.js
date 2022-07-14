@@ -1,28 +1,11 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, useMemo } from 'react';
 import { Card, Spinner, Alert, Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router';
 import { useSearchParams, useLocation } from "react-router-dom";
-import { getProductsThunk } from '../store/modules/products/slice';
-import {
-  getProductsList,
-  getProductsIsLoading,
-  getProductsError,
-  getProductsPagesCount,
-  getProductsPriceSum,
-  getHighRateProductsCount
-} from '../store/modules/products/selectors';
+import { useGetProductsQuery } from '../store/modules/products/api';
 import AppPagination from './AppPagination';
 
-const ProductsList = ({ total }) => {
-  const dispatch = useDispatch();
-  const products = useSelector(getProductsList);
-  const isLoading = useSelector(getProductsIsLoading);
-  const error = useSelector(getProductsError);
-  const pagesCount = useSelector(getProductsPagesCount);
-  const productsPriceSum = useSelector(getProductsPriceSum);
-  const highRatingProductsCount = useSelector(getHighRateProductsCount);
-  
+const ProductsList = ({ total }) => {  
   const location = useLocation();
   const [params] = useSearchParams();
 
@@ -30,10 +13,11 @@ const ProductsList = ({ total }) => {
   const searchTerm = params.get('search') || '';
 
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    dispatch(getProductsThunk({ activePage, total }));
-  }, [total, activePage, dispatch]);
+
+  const { data, isLoading, error } = useGetProductsQuery({ activePage, total });
+
+  const products = useMemo(() => data?.products || [], [data]);
+  const pagesCount = (data?.total || 0) / total;
 
   const onPageNavigation = useCallback((index) => {
     const params = new URLSearchParams(location.search);
@@ -89,7 +73,7 @@ const ProductsList = ({ total }) => {
           onChange={onSearch}
         />
       </InputGroup>
-        {filteredProducts.map(product => (
+        {filteredProducts?.map(product => (
           <Card
             style={{ width: '18rem' }}
             key={product.id}
@@ -105,10 +89,6 @@ const ProductsList = ({ total }) => {
             </Card.Body>
           </Card>
         ))}
-        <div>
-          <strong>Price: {productsPriceSum}$</strong><br />
-          <strong>High rate products count: {highRatingProductsCount}</strong>
-        </div>
         <div className='d-flex justify-content-center'>
           <AppPagination
             pagesCount={pagesCount}

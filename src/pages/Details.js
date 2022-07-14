@@ -1,23 +1,10 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { Spinner, Alert } from 'react-bootstrap';
-import { getProductById } from '../api/products';
+import { useGetProductByIdQuery } from '../store/modules/products/api';
 
 const Details = () => {
   const params = useParams();
-  const [productData, setProductData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  useEffect(() => {
-    setLoading(true);
-    getProductById(params.productId).then(product => {
-      setProductData(product.data);
-    }).catch(err => {
-      setError(err);
-    }).finally(() => {
-      setLoading(false);
-    });
-  }, [params.productId]);
+  const { data, error, isLoading } = useGetProductByIdQuery(params.productId);
 
   const renderImage = (url, index) => {
     return (
@@ -25,7 +12,7 @@ const Details = () => {
     );
   };
 
-  if (loading || !productData) {
+  if (isLoading || !data) {
     return (
       <Spinner animation="border" role="status" className='mt-5'>
           <span className="visually-hidden">Loading...</span>
@@ -43,11 +30,11 @@ const Details = () => {
 
   return (
     <div>
-      <h1>{productData.title}</h1>
+      <h1>{data.title}</h1>
       <div>
-        {productData.images.map(renderImage)}
-        <div>{productData.brand}</div>
-        <strong>{productData.price} $</strong>
+        {data?.images.map(renderImage)}
+        <div>{data?.brand}</div>
+        <strong>{data?.price} $</strong>
       </div>
     </div>
   );
