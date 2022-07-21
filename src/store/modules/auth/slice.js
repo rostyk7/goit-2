@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { createUser, login, getProfile, refreshToken } from "../../../api/auth";
-import { getAccessToken, getRefreshToken} from './selectors';
+import { createUser, login, getProfile, logout } from "../../../api/auth";
 
 export const createUserThunk = createAsyncThunk('create_user', async (form) => {
   const { data } = await createUser(form);
@@ -13,23 +12,12 @@ export const loginThunk = createAsyncThunk('login', async (form) => {
 });
 
 export const getProfileThunk = createAsyncThunk('profile', async (_, store) => {
-  const token = getAccessToken(store.getState());
-  let response;
-  try {
-    const { data } = await getProfile(token);
-    response = data;
-  } catch(e) {
-    if (e.response.status === 401) {
-      const tokenToRefresh = getRefreshToken(store.getState());
-      const { data } = await refreshToken(token, tokenToRefresh);
-      store.dispatch(setNewCredentials({
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken
-      }));
-      store.dispatch(getProfileThunk());
-    }
-  }
-  return response;
+  const { data } = await getProfile();
+  return data;
+});
+
+export const logoutThunk = createAsyncThunk('logout', async () => {
+  await logout();
 });
 
 const initialState = {
@@ -58,9 +46,10 @@ const authSlice = createSlice({
         state.accessToken = payload.accessToken;
         state.refreshToken = payload.refreshToken;
         state.isLoginLoading = false;
-        state.error = null;
+        state.loginError = null;
       })
-      .addCase(loginThunk.rejected, (state, { payload }) => {
+      .addCase(loginThunk.rejected, (state, action) => {
+        state.loginError = action.error.message === 'Request failed with status code 401' ? 'Invalid username or password' : 'Something went wrong!';
         state.isLoginLoading = false;
       })
       .addCase(getProfileThunk.pending, (state) => {
@@ -74,9 +63,13 @@ const authSlice = createSlice({
       .addCase(getProfileThunk.rejected, (state, { payload }) => {
         state.isProfileLoading = false;
       })
+      .addCase(logoutThunk.fulfilled, (state) => {
+        state.accessToken = null;
+        state.refreshToken = null;
+      });
   }
 });
 
-const { setNewCredentials } = authSlice.actions;
+export const { setNewCredentials } = authSlice.actions;
 
 export default authSlice.reducer;

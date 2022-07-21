@@ -6,6 +6,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import store, { persistor } from './store';
 import { Provider } from 'react-redux';
+import { setStore } from './api/auth';
+
+setStore(store);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

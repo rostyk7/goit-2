@@ -1,16 +1,29 @@
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
-import { useCallback, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
 import { loginThunk } from '../store/modules/auth/slice';
+import { isAuthenticated, getLoginError } from '../store/modules/auth/selectors';
+import { Alert } from 'react-bootstrap';
 
 const Login = () => {
   const dispatch = useDispatch();
+  const isAuth = useSelector(isAuthenticated);
   const [form, setForm] = useState({
     username: '',
     password: ''
   });
+
+  const error = useSelector(getLoginError);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuth) {
+      navigate('/profile');
+    }
+  }, [isAuth, navigate]);
 
   const onChange = useCallback(event => {
     setForm(prevForm => ({
@@ -19,9 +32,9 @@ const Login = () => {
     }));
   }, [setForm]);
 
-  const onSubmit = useCallback((event) => {
+  const onSubmit = useCallback(async (event) => {
     event.preventDefault();
-    dispatch(loginThunk(form));
+    await dispatch(loginThunk(form));
   }, [form, dispatch]);
 
   return (
@@ -36,7 +49,7 @@ const Login = () => {
           <Form.Label>Password</Form.Label>
           <Form.Control value={form.password} type="password" name='password' placeholder="Password" onChange={onChange} />
         </Form.Group>
-
+        {error && <Alert variant='danger'>{error}</Alert>}
         <Button variant="primary" type="submit">
           Login
         </Button>
